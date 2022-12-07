@@ -14,7 +14,8 @@ import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
     private SensorManager sensorManager;
-    private TextView myText = null;
+    private TextView accValText = null;
+    private TextView gyrValText = null;
     private AccelerometerValues accVal = new AccelerometerValues(0, 0, 0);
     private GyroscopeValues gyrVal = new GyroscopeValues(0, 0, 0);
 
@@ -34,10 +35,11 @@ public class MainActivity extends AppCompatActivity {
         //This is in the onCreate method
         LinearLayout lView = new LinearLayout(this);
 
-        myText = new TextView(this);
+        accValText = new TextView(this);
+        gyrValText = new TextView(this);
 
-
-        lView.addView(myText);
+        lView.addView(accValText);
+        lView.addView(gyrValText);
 
         setContentView(lView);
     }
@@ -63,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
             accVal.setY(yAccValue);
             accVal.setZ(zAccValue);
 
-            myText.setText(accVal.toString() + "\n" + gyrVal.toString());
+            accValText.setText(accVal.toString());
           }
         @Override
         public void onAccuracyChanged(Sensor sensor, int accuracy) {
@@ -82,6 +84,8 @@ public class MainActivity extends AppCompatActivity {
             gyrVal.setX(xGyrValue);
             gyrVal.setY(yGyrValue);
             gyrVal.setZ(zGyrValue);
+
+            gyrValText.setText(gyrVal.toString());
 
          }
         @Override
