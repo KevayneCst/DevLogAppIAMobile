@@ -35,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
         LinearLayout lView = new LinearLayout(this);
 
         myText = new TextView(this);
-        myText.setText(accVal.toString() + "\n" + gyrVal.toString());
+
 
         lView.addView(myText);
 
@@ -62,6 +62,8 @@ public class MainActivity extends AppCompatActivity {
             accVal.setX(xAccValue);
             accVal.setY(yAccValue);
             accVal.setZ(zAccValue);
+
+            myText.setText(accVal.toString() + "\n" + gyrVal.toString());
           }
         @Override
         public void onAccuracyChanged(Sensor sensor, int accuracy) {
