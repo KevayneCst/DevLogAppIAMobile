@@ -8,6 +8,7 @@ import androidx.core.content.ContextCompat;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -32,6 +33,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private Button stopButton;
     private Button runButton;
     private Button walkButton;
+    private Button pauseButton;
 
     private SensorManager sensorManager;
     private Sensor accelerometer;
@@ -39,7 +41,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     private FileWriter writer;
     private boolean recording;
-    private String currentActivity;
+    private int currentActivity;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +52,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         stopButton = findViewById(R.id.stop_button);
         runButton = findViewById(R.id.run_button);
         walkButton = findViewById(R.id.walk_button);
+        pauseButton = findViewById(R.id.pause_button);
 
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
@@ -72,14 +75,20 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         runButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                currentActivity = "Run";
+                currentActivity = 2;
             }
         });
 
         walkButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                currentActivity = "Walk";
+                currentActivity = 1;
+            }
+        });
+        pauseButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                currentActivity = 0;
             }
         });
 
