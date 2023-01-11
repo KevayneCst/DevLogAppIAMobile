@@ -40,6 +40,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private Sensor gyroscope;
 
     private FileWriter writer;
+    private FileWriter writer_pred;
     private boolean recording;
     private int currentActivity;
 
@@ -120,8 +121,12 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.US);
                 String currentDateAndTime = sdf.format(new Date());
                 File file = new File(dir, "data_" +currentDateAndTime + ".csv");
+                File predFile = new File(dir,"prediction_file.csv");
                 writer = new FileWriter(file);
                 writer.append("Timestamp,Acc_X,Acc_Y,Acc_Z,Gyr_X,Gyr_Y,Gyr_Z,Activity\n");
+
+                writer_pred = new FileWriter(predFile);
+                writer_pred.append("Timestamp,Acc_X,Acc_Y,Acc_Z,Gyr_X,Gyr_Y,Gyr_Z,Activity\n");
                 recording = true;
 
                 String filePath = file.getAbsolutePath();
@@ -139,6 +144,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             try {
                 writer.flush();
                 writer.close();
+                writer_pred.flush();
+                writer_pred.close();
                 recording = false;
                 Toast.makeText(MainActivity.this, "Stopped recording sensor data", Toast.LENGTH_SHORT).show();
             } catch (IOException e) {
@@ -164,6 +171,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     gyr_z = event.values[2];
                 }
                 writer.append(timestamp + "," + acc_x + "," + acc_y + "," + acc_z + "," + gyr_x + "," + gyr_y + "," + gyr_z + "," + currentActivity + "\n");
+                writer_pred.append(timestamp + "," + acc_x + "," + acc_y + "," + acc_z + "," + gyr_x + "," + gyr_y + "," + gyr_z + "," + currentActivity + "\n");
             } catch (IOException e) {
                 e.printStackTrace();
             }
