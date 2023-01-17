@@ -5,6 +5,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+
+
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -20,12 +22,16 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.ankk.motiontracker.prediction.PrepareDataTask;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+
+
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
 
@@ -43,6 +49,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private FileWriter writer_pred;
     private boolean recording;
     private int currentActivity;
+
+    private PrepareDataTask dataprocess;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -152,6 +161,12 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 e.printStackTrace();
             }
         }
+        PrepareDataTask dataprocess = new PrepareDataTask(this,10);
+        float[][][] x = dataprocess.doInBackground();
+        Toast.makeText(MainActivity.this, "Record Size : " + x.length, Toast.LENGTH_SHORT).show();
+
+
+
     }
 
     @Override
