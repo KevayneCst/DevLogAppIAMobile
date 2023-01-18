@@ -1,5 +1,7 @@
 package com.ankk.motiontracker;
 
+import static androidx.constraintlayout.helper.widget.MotionEffect.TAG;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -10,27 +12,42 @@ import androidx.core.content.ContextCompat;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.content.res.AssetFileDescriptor;
+import android.content.res.AssetManager;
 import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 //import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.ankk.motiontracker.debug.DebugArray;
 import com.ankk.motiontracker.prediction.PrepareDataTask;
+import com.opencsv.CSVReader;
+
+import org.tensorflow.lite.Interpreter;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.MappedByteBuffer;
+import java.nio.channels.FileChannel;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
-
+import java.util.concurrent.ExecutionException;
 
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
@@ -40,6 +57,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private Button runButton;
     private Button walkButton;
     private Button pauseButton;
+    private TextView txtPrediction;
 
     private SensorManager sensorManager;
     private Sensor accelerometer;
@@ -58,11 +76,15 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
+
         startButton = findViewById(R.id.start_button);
         stopButton = findViewById(R.id.stop_button);
         runButton = findViewById(R.id.run_button);
         walkButton = findViewById(R.id.walk_button);
         pauseButton = findViewById(R.id.pause_button);
+
+        txtPrediction = findViewById(R.id.result_text);
 
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
@@ -78,7 +100,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         stopButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                stopRecording();
+                try {
+                    stopRecording();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         });
 
@@ -148,26 +174,37 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         }
     }
 
-    private void stopRecording() {
+    private void stopRecording() throws IOException {
+
+        Context context = this;
+
         if (recording) {
             try {
                 writer.flush();
                 writer.close();
                 writer_pred.flush();
                 writer_pred.close();
+
+
+                PrepareDataTask dataprocess = new PrepareDataTask(MainActivity.this,10);
+                dataprocess.execute();
+
+
+
+
                 recording = false;
                 Toast.makeText(MainActivity.this, "Stopped recording sensor data", Toast.LENGTH_SHORT).show();
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
-        PrepareDataTask dataprocess = new PrepareDataTask(this,10);
-        float[][][] x = dataprocess.doInBackground();
-        Toast.makeText(MainActivity.this, "Record Size : " + x.length, Toast.LENGTH_SHORT).show();
-
-
 
     }
+
+
+
+
+
 
     @Override
     public void onSensorChanged(SensorEvent event) {
@@ -210,6 +247,62 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     protected void onPause() {
         super.onPause();
         sensorManager.unregisterListener(this);
+    }
+
+
+    private class PrepareDataTask extends AsyncTask<Void, Void, float[][][]>  {
+        private Context context;
+        private int n_past;
+
+        public PrepareDataTask(Context context, int n_past) {
+            this.context = context;
+            this.n_past = n_past;
+        }
+        @Override
+        protected float[][][] doInBackground(Void... voids) {
+            try {
+                // Load the data from the CSV file
+                FileReader fileReader = new FileReader(Environment.getExternalStorageDirectory() + "/sensor_data/prediction_file.csv");
+                CSVReader csvReader = new CSVReader(fileReader);
+
+                List<String[]> allRows = csvReader.readAll();
+                int n = allRows.size();
+                float[][][] data = new float[n][n_past][6];
+
+                for (int i = this.n_past+1; i < n; i++) {
+                    for (int j=i-this.n_past;j<i;j++){
+                        String[] row = allRows.get(j);
+                        for (int k = 0; k < 6; k++) {
+                            data[j][j+this.n_past-i][k] = Float.parseFloat(row[k+1]);
+                        }
+                    }
+                }
+                float[][] inputArray = data[10];
+
+
+                DebugArray debugArray = new DebugArray(inputArray);
+                debugArray.Print2DArray();
+                float[][] output = new float[1][3];
+
+                try (Interpreter interpreter = new Interpreter(loadModelFile(MainActivity.this))) {
+                    interpreter.run(inputArray, output);
+                }
+                txtPrediction.setText(output.toString());
+
+                return data;
+            } catch (Exception e) {
+                Log.e(TAG, "Error reading CSV file", e);
+                return null;
+            }
+        }
+        private MappedByteBuffer loadModelFile(Context context) throws IOException {
+            AssetFileDescriptor fileDescriptor = context.getAssets().openFd("model.tflite");
+            FileInputStream inputStream = new FileInputStream(fileDescriptor.getFileDescriptor());
+            FileChannel fileChannel = inputStream.getChannel();
+            long startOffset = fileDescriptor.getStartOffset();
+            long declaredLength = fileDescriptor.getDeclaredLength();
+            return fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset, declaredLength);
+        }
     }
 }
 

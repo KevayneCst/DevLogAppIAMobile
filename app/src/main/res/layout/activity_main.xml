@@ -35,6 +35,15 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Pause" />
+    <TextView
+        android:id="@+id/result_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Prediction results will be shown here"
+        android:textSize="20sp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="16dp" />
 
 
 </LinearLayout>
