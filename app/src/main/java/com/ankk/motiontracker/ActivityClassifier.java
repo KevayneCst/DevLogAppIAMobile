@@ -78,7 +78,6 @@ public class ActivityClassifier {
                 index = i;
             }
         }
-
         // Return the activity corresponding to the highest output value
         switch (index) {
             case 0:
@@ -104,7 +103,7 @@ public class ActivityClassifier {
     }
 
     // Enum for the different types of activities
-    private enum ActivityType {
+    public enum ActivityType {
         RUNNING,
         WALKING,
         OTHER_ACTIVITY,
