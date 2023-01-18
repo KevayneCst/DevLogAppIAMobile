@@ -250,14 +250,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 }
                 float[][] inputArray = data[10];
                 ActivityClassifier activityClassifier = new ActivityClassifier(MainActivity.this);
-                ActivityClassifier.ActivityType pred = activityClassifier.classifyActivity(
-                        inputArray[0][0],
-                        inputArray[0][1],
-                        inputArray[0][2],
-                        inputArray[0][3],
-                        inputArray[0][4],
-                        inputArray[0][5]
-                );
+                ActivityClassifier.ActivityType pred = activityClassifier.classifyActivity(inputArray);
                 System.out.println(pred);
 
 

@@ -3,10 +3,7 @@ package com.ankk.motiontracker;
 import android.app.Activity;
 import android.content.res.AssetFileDescriptor;
 
-import org.tensorflow.lite.Delegate;
 import org.tensorflow.lite.Interpreter;
-import org.tensorflow.lite.gpu.GpuDelegate;
-import org.tensorflow.lite.nnapi.NnApiDelegate;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -20,7 +17,6 @@ import java.nio.channels.FileChannel;
 
 public class ActivityClassifier {
     private Interpreter interpreter;
-    private Delegate delegate = null;
     private float[][] input;
     private float[][] output;
     private boolean useGpu = true;
@@ -31,20 +27,15 @@ public class ActivityClassifier {
         MappedByteBuffer tfliteModel = loadModelFile(activity);
 
         // Choose the type of delegate to use
-        if (useGpu) {
-            delegate = new GpuDelegate();
-        } else if (useNnApi) {
-            delegate = new NnApiDelegate();
-        }
+
 
         // Initialize the Interpreter with the TensorFlow Lite model and the chosen delegate
-        Interpreter.Options options = new Interpreter.Options();
-        options.addDelegate(delegate);
-        interpreter = new Interpreter(tfliteModel, options);
+        //Interpreter.Options options = new Interpreter.Options();
+        interpreter = new Interpreter(tfliteModel);
 
         // Initialize the input and output arrays
         input = new float[1][6];
-        output = new float[1][4];
+        output = new float[1][3];
     }
 
     // Load the TensorFlow Lite model from the assets folder
@@ -57,22 +48,19 @@ public class ActivityClassifier {
         return fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset, declaredLength);
     }
 
-    public ActivityType classifyActivity(float accelerometer_x, float accelerometer_y, float accelerometer_z,
-                                         float gyroscope_x, float gyroscope_y, float gyroscope_z) {
-        input[0][0] = accelerometer_x;
-        input[0][1] = accelerometer_y;
-        input[0][2] = accelerometer_z;
-        input[0][3] = gyroscope_x;
-        input[0][4] = gyroscope_y;
-        input[0][5] = gyroscope_z;
+    public ActivityType classifyActivity(float[][] input) {
+
 
         // Classify the activity based on the input data
         interpreter.run(input, output);
 
+
+
         // Find the index of the highest output value
         int index = -1;
         float max = 0.0f;
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < 3; i++) {
+            System.out.println(output[0][i]);
             if (output[0][i] > max) {
                 max = output[0][i];
                 index = i;
