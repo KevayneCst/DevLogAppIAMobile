@@ -89,7 +89,7 @@ public class DashboardActivity extends AppCompatActivity {
             int quantityWalking=0;
             int quantityRunning=0;
             int quantityNothing = 0;
-            int sizeDataset=0;
+            int sizeDataset = 0;
             try {
                 // Load the data from the CSV file
                 FileReader fileReader = new FileReader(Environment.getExternalStorageDirectory() + "/sensor_data/prediction_file.csv");
@@ -113,28 +113,35 @@ public class DashboardActivity extends AppCompatActivity {
                     float[][] inputArray = data[j];
                     ActivityClassifier activityClassifier = new ActivityClassifier(DashboardActivity.this);
                     ActivityClassifier.ActivityType pred = activityClassifier.classifyActivity(inputArray);
-                    System.out.println(pred);
                     switch (pred){
-                        case NOTHING: quantityNothing++;
-                        case WALKING: quantityWalking++;
-                        case RUNNING: quantityRunning++;
+                        case NOTHING:
+                            quantityNothing++;
+                            break;
+                        case WALKING:
+                            quantityWalking++;
+                            break;
+                        case RUNNING:
+                            quantityRunning++;
+                            break;
+                        default: //DO NOTHING;
                     }
+                    System.out.println("j:"+j+"n:"+quantityNothing+" w:"+quantityWalking+" r:"+quantityRunning+" tot:"+sizeDataset);
                 }
                 List<PieEntry> entries = new ArrayList<>();
                 if (quantityNothing > 0) {
-                    float walkingPercentage = (float) quantityNothing / sizeDataset;
+                    float nothingPercentage = (float) quantityNothing / sizeDataset;
+                    System.out.println(nothingPercentage);
+                    entries.add(new PieEntry(nothingPercentage, "Nothing"));
+                }
+                if (quantityWalking > 0) {
+                    float walkingPercentage = (float) quantityWalking / sizeDataset;
                     System.out.println(walkingPercentage);
                     entries.add(new PieEntry(walkingPercentage, "Walking"));
                 }
-                if (quantityWalking > 0) {
-                    float runningPercentage = (float) quantityWalking / sizeDataset;
+                if (quantityRunning > 0) {
+                    float  runningPercentage = (float) quantityRunning / sizeDataset;
                     System.out.println(runningPercentage);
                     entries.add(new PieEntry(runningPercentage, "Running"));
-                }
-                if (quantityRunning > 0) {
-                    float nothingPercentage = (float) quantityRunning / sizeDataset;
-                    System.out.println(nothingPercentage);
-                    entries.add(new PieEntry(nothingPercentage, "Nothing"));
                 }
 
                 //contiuation
