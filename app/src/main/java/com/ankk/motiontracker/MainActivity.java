@@ -11,6 +11,7 @@ import androidx.core.content.ContextCompat;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.AssetFileDescriptor;
 import android.hardware.Sensor;
@@ -24,11 +25,13 @@ import android.os.Environment;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.opencsv.CSVReader;
 
 import org.tensorflow.lite.Interpreter;
+import org.w3c.dom.Text;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -51,6 +54,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private Button runButton;
     private Button walkButton;
     private Button pauseButton;
+    private Button processButton;
+
+    private TextView predText;
 
     private SensorManager sensorManager;
     private Sensor accelerometer;
@@ -68,12 +74,22 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        
+        Intent intentDashboard = new Intent(this,DashboardActivity.class);
 
+
+        /**
+         * Buttons
+         */
         startButton = findViewById(R.id.start_button);
         stopButton = findViewById(R.id.stop_button);
         runButton = findViewById(R.id.run_button);
         walkButton = findViewById(R.id.walk_button);
         pauseButton = findViewById(R.id.pause_button);
+        processButton = findViewById(R.id.process);
+
+
+        predText = findViewById(R.id.result_text);
 
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
@@ -110,6 +126,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             @Override
             public void onClick(View view) {
                 currentActivity = 0;
+            }
+        });
+        processButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                stopRecording();
+                startActivity(intentDashboard);
             }
         });
 
@@ -196,7 +219,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     gyr_z = event.values[2];
                 }
                 writer.append(timestamp + "," + acc_x + "," + acc_y + "," + acc_z + "," + gyr_x + "," + gyr_y + "," + gyr_z + "," + currentActivity + "\n");
-                writer_pred.append(timestamp + "," + acc_x + "," + acc_y + "," + acc_z + "," + gyr_x + "," + gyr_y + "," + gyr_z + "," + currentActivity + "\n");
+                writer_pred.append(timestamp + "," + acc_x + "," + acc_y + "," + acc_z + "," + gyr_x + "," + gyr_y + "," + gyr_z + "\n");
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -252,6 +275,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 ActivityClassifier activityClassifier = new ActivityClassifier(MainActivity.this);
                 ActivityClassifier.ActivityType pred = activityClassifier.classifyActivity(inputArray);
                 System.out.println(pred);
+                predText.setText(pred.toString());
 
 
                 return data;

@@ -69,13 +69,11 @@ public class ActivityClassifier {
         // Return the activity corresponding to the highest output value
         switch (index) {
             case 0:
-                return ActivityType.RUNNING;
+                return ActivityType.NOTHING;
             case 1:
                 return ActivityType.WALKING;
-            case 3:
-                return ActivityType.NOTHING;
             case 2:
-                return ActivityType.OTHER_ACTIVITY;
+                return ActivityType.RUNNING;
             default:
                 return ActivityType.OTHER_ACTIVITY;
         }
