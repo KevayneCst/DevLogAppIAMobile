@@ -45,36 +45,9 @@ public class DashboardActivity extends AppCompatActivity {
         nothingTextView = findViewById(R.id.nothing_text_view);
         pieChart = findViewById(R.id.pie_chart);
 
-        PrepareDataTask dataprocess = new PrepareDataTask(DashboardActivity.this,10);
+        PrepareDataTask dataprocess = new PrepareDataTask(DashboardActivity.this,50);
         dataprocess.execute();
 
-        /**
-        // Display the predictions as a pie chart
-        List<PieEntry> entries = new ArrayList<>();
-        if (walkingSeconds > 0) {
-            float walkingPercentage = (float) walkingSeconds / totalSeconds;
-            entries.add(new PieEntry(walkingPercentage, "Walking"));
-        }
-        if (runningSeconds > 0) {
-            float runningPercentage = (float) runningSeconds / totalSeconds;
-            entries.add(new PieEntry(runningPercentage, "Running"));
-        }
-        if (nothingSeconds > 0) {
-            float nothingPercentage = (float) nothingSeconds / totalSeconds;
-            entries.add(new PieEntry(nothingPercentage, "Nothing"));
-        }
-
-        //contiuation
-        PieDataSet dataSet = new PieDataSet(entries, "Activities");
-        dataSet.setColors(ColorTemplate.MATERIAL_COLORS);
-        PieData data = new PieData(dataSet);
-        pieChart.setData(data);
-        pieChart.setDescription(null);
-        pieChart.setHoleRadius(0);
-        pieChart.setTransparentCircleRadius(0);
-        pieChart.animateY(1000);
-        pieChart.invalidate();
-         **/
     }
     private class PrepareDataTask extends AsyncTask<Void, Void, float[][][]> {
         private Context context;

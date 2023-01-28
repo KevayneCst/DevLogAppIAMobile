@@ -14,6 +14,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.AssetFileDescriptor;
+import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -28,6 +29,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.opencsv.CSVReader;
 
 import org.tensorflow.lite.Interpreter;
@@ -54,9 +56,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private Button runButton;
     private Button walkButton;
     private Button pauseButton;
-    private Button processButton;
+    private FloatingActionButton processButton;
 
-    private TextView predText;
+
 
     private SensorManager sensorManager;
     private Sensor accelerometer;
@@ -82,14 +84,15 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
          * Buttons
          */
         startButton = findViewById(R.id.start_button);
+        startButton.setBackgroundColor(Color.GREEN);
         stopButton = findViewById(R.id.stop_button);
+        stopButton.setBackgroundColor(Color.RED);
         runButton = findViewById(R.id.run_button);
         walkButton = findViewById(R.id.walk_button);
         pauseButton = findViewById(R.id.pause_button);
-        processButton = findViewById(R.id.process);
+        processButton = findViewById(R.id.processfloatingButton);
 
 
-        predText = findViewById(R.id.result_text);
 
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
@@ -195,8 +198,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 e.printStackTrace();
             }
         }
-        PrepareDataTask dataprocess = new PrepareDataTask(MainActivity.this,10);
-        dataprocess.execute();
         //Toast.makeText(MainActivity.this, "Record Size : " + x.length, Toast.LENGTH_SHORT).show();
 
 
@@ -244,54 +245,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         super.onPause();
         sensorManager.unregisterListener(this);
     }
-    private class PrepareDataTask extends AsyncTask<Void, Void, float[][][]> {
-        private Context context;
-        private int n_past;
 
-        public PrepareDataTask(Context context, int n_past) {
-            this.context = context;
-            this.n_past = n_past;
-        }
-        @Override
-        protected float[][][] doInBackground(Void... voids) {
-            try {
-                // Load the data from the CSV file
-                FileReader fileReader = new FileReader(Environment.getExternalStorageDirectory() + "/sensor_data/prediction_file.csv");
-                CSVReader csvReader = new CSVReader(fileReader);
-
-                List<String[]> allRows = csvReader.readAll();
-                int n = allRows.size();
-                float[][][] data = new float[n][n_past][6];
-
-                for (int i = this.n_past+1; i < n; i++) {
-                    for (int j=i-this.n_past;j<i;j++){
-                        String[] row = allRows.get(j);
-                        for (int k = 0; k < 6; k++) {
-                            data[j][j+this.n_past-i][k] = Float.parseFloat(row[k+1]);
-                        }
-                    }
-                }
-                float[][] inputArray = data[10];
-                ActivityClassifier activityClassifier = new ActivityClassifier(MainActivity.this);
-                ActivityClassifier.ActivityType pred = activityClassifier.classifyActivity(inputArray);
-                System.out.println(pred);
-                predText.setText(pred.toString());
-
-
-                return data;
-            } catch (Exception e) {
-                Log.e(TAG, "Error reading CSV file", e);
-                return null;
-            }
-        }
-        private MappedByteBuffer loadModelFile(Context context) throws IOException {
-            AssetFileDescriptor fileDescriptor = context.getAssets().openFd("model.tflite");
-            FileInputStream inputStream = new FileInputStream(fileDescriptor.getFileDescriptor());
-            FileChannel fileChannel = inputStream.getChannel();
-            long startOffset = fileDescriptor.getStartOffset();
-            long declaredLength = fileDescriptor.getDeclaredLength();
-            return fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset, declaredLength);
-        }
-    }
 }
 
