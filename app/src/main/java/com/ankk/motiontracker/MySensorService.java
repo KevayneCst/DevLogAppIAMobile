@@ -47,10 +47,12 @@ public class MySensorService extends Service implements SensorEventListener {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        Toast.makeText(this, "start recording", Toast.LENGTH_SHORT).show();
         if(intent.getExtras()!=null){
             int currentActivity = intent.getExtras().getInt("currentActivity");
             startRecording(currentActivity);
         }else {
+            System.out.println("[DEBUG] : onStartCommand - 'intent.getExtras()!=null'");
             startRecording();
         }
         mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
@@ -110,6 +112,7 @@ public class MySensorService extends Service implements SensorEventListener {
     }
 
     private void startRecording() {
+        System.out.println("[DEBUG] : I'm in startRecording");
         if (!recording) {
             try {
                 File dir = new File(Environment.getExternalStorageDirectory(), "sensor_data");

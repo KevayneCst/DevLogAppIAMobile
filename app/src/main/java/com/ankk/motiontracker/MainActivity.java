@@ -101,6 +101,7 @@ public class MainActivity extends AppCompatActivity {
         startButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                System.out.println("[DEBUG] : I'm on onClick startButton");
                 Intent serviceIntent = new Intent(MainActivity.this, MySensorService.class);
                 startService(serviceIntent);
             }

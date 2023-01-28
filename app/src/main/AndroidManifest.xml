@@ -32,6 +32,7 @@
             android:taskAffinity="com.ankk.motiontracker.DashboardActivity"
             >
         </activity>
+        <service android:name=".MySensorService"></service>
 
     </application>
 
