@@ -100,19 +100,22 @@ public class DashboardActivity extends AppCompatActivity {
                     }
                     System.out.println("j:"+j+"n:"+quantityNothing+" w:"+quantityWalking+" r:"+quantityRunning+" tot:"+sizeDataset);
                 }
+                float nothingPercentage = 0;
                 List<PieEntry> entries = new ArrayList<>();
                 if (quantityNothing > 0) {
-                    float nothingPercentage = (float) quantityNothing / sizeDataset;
+                    nothingPercentage = (float) quantityNothing / sizeDataset;
                     System.out.println(nothingPercentage);
                     entries.add(new PieEntry(nothingPercentage, "Nothing"));
                 }
                 if (quantityWalking > 0) {
                     float walkingPercentage = (float) quantityWalking / sizeDataset;
+                    //walkingTextView.setText("Walking : "+(walkingPercentage*100) + "%");
                     System.out.println(walkingPercentage);
                     entries.add(new PieEntry(walkingPercentage, "Walking"));
                 }
                 if (quantityRunning > 0) {
                     float  runningPercentage = (float) quantityRunning / sizeDataset;
+                    //runningTextView.setText("Walking : "+(runningPercentage*100) + "%");
                     System.out.println(runningPercentage);
                     entries.add(new PieEntry(runningPercentage, "Running"));
                 }
@@ -126,6 +129,7 @@ public class DashboardActivity extends AppCompatActivity {
                 pieChart.setHoleRadius(0);
                 pieChart.setTransparentCircleRadius(0);
                 pieChart.invalidate();
+
 
                 return data;
             } catch (Exception e) {

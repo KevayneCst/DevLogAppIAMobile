@@ -11,19 +11,19 @@
         android:id="@+id/walking_text_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Walking: 0 min, 0 sec" />
+        android:text="Walking: " />
 
     <TextView
         android:id="@+id/running_text_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Running: 0 min, 0 sec" />
+        android:text="Running: " />
 
     <TextView
         android:id="@+id/nothing_text_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Nothing: 0 min, 0 sec" />
+        android:text="Nothing: " />
 
     <com.github.mikephil.charting.charts.PieChart
         android:id="@+id/pie_chart"

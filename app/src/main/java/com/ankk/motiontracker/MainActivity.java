@@ -49,7 +49,7 @@ import java.util.Locale;
 
 
 
-public class MainActivity extends AppCompatActivity implements SensorEventListener {
+public class MainActivity extends AppCompatActivity {
 
     private Button startButton;
     private Button stopButton;
@@ -57,6 +57,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private Button walkButton;
     private Button pauseButton;
     private FloatingActionButton processButton;
+    private int currentActivity;
 
 
 
@@ -64,12 +65,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private Sensor accelerometer;
     private Sensor gyroscope;
 
-    private FileWriter writer;
-    private FileWriter writer_pred;
-    private boolean recording;
-    private int currentActivity;
-
-    private PrepareDataTask dataprocess;
 
 
     @Override
@@ -101,20 +96,25 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         startButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startRecording();
+                Intent serviceIntent = new Intent(MainActivity.this, MySensorService.class);
+                startService(serviceIntent);;
             }
         });
 
         stopButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                stopRecording();
+                Intent serviceIntent = new Intent(MainActivity.this, MySensorService.class);
+                stopService(serviceIntent);
             }
         });
 
         runButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                Intent serviceIntent = new Intent(MainActivity.this, MySensorService.class);
+                serviceIntent.putExtra("currentActivity", 2);
+                startService(serviceIntent);
                 currentActivity = 2;
             }
         });
@@ -122,19 +122,26 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         walkButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                Intent serviceIntent = new Intent(MainActivity.this, MySensorService.class);
+                serviceIntent.putExtra("currentActivity", 1);
+                startService(serviceIntent);
                 currentActivity = 1;
             }
         });
         pauseButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                Intent serviceIntent = new Intent(MainActivity.this, MySensorService.class);
+                serviceIntent.putExtra("currentActivity", 2);
+                startService(serviceIntent);
                 currentActivity = 0;
             }
         });
         processButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                stopRecording();
+                Intent serviceIntent = new Intent(MainActivity.this, MySensorService.class);
+                stopService(serviceIntent);
                 startActivity(intentDashboard);
             }
         });
@@ -157,94 +164,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         }
     }
 
-    private void startRecording() {
-        if (!recording) {
-            try {
-                File dir = new File(Environment.getExternalStorageDirectory(), "sensor_data");
-                if (!dir.exists()) {
-                    dir.mkdir();
-                }
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.US);
-                String currentDateAndTime = sdf.format(new Date());
-                File file = new File(dir, "data_" +currentDateAndTime + ".csv");
-                File predFile = new File(dir,"prediction_file.csv");
-                writer = new FileWriter(file);
-                writer.append("Timestamp,Acc_X,Acc_Y,Acc_Z,Gyr_X,Gyr_Y,Gyr_Z,Activity\n");
-
-                writer_pred = new FileWriter(predFile);
-                writer_pred.append("Timestamp,Acc_X,Acc_Y,Acc_Z,Gyr_X,Gyr_Y,Gyr_Z,Activity\n");
-                recording = true;
-
-                String filePath = file.getAbsolutePath();
-                Toast.makeText(MainActivity.this, "Started recording sensor data in file : " + filePath, Toast.LENGTH_SHORT).show();
-
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    private void stopRecording() {
-        if (recording) {
-            try {
-                writer.flush();
-                writer.close();
-                writer_pred.flush();
-                writer_pred.close();
-                recording = false;
-                Toast.makeText(MainActivity.this, "Stopped recording sensor data", Toast.LENGTH_SHORT).show();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        //Toast.makeText(MainActivity.this, "Record Size : " + x.length, Toast.LENGTH_SHORT).show();
-
-
-    }
-
-    @Override
-    public void onSensorChanged(SensorEvent event) {
-        if (recording) {
-            try {
-                long timestamp = event.timestamp;
-                float acc_x = event.values[0];
-                float acc_y = event.values[1];
-                float acc_z = event.values[2];
-                float gyr_x = 0.0f;
-                float gyr_y = 0.0f;
-                float gyr_z = 0.0f;
-                if (event.sensor.getType() == Sensor.TYPE_GYROSCOPE) {
-                    gyr_x = event.values[0];
-                    gyr_y = event.values[1];
-                    gyr_z = event.values[2];
-                }
-                writer.append(timestamp + "," + acc_x + "," + acc_y + "," + acc_z + "," + gyr_x + "," + gyr_y + "," + gyr_z + "," + currentActivity + "\n");
-                writer_pred.append(timestamp + "," + acc_x + "," + acc_y + "," + acc_z + "," + gyr_x + "," + gyr_y + "," + gyr_z + "\n");
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-
-    @Override
-    public void onAccuracyChanged(Sensor sensor, int accuracy) {
-        // Not used
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
-        sensorManager.registerListener(this, gyroscope, SensorManager.SENSOR_DELAY_NORMAL);
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        sensorManager.unregisterListener(this);
-    }
 
 }
 
