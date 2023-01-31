@@ -132,7 +132,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent serviceIntent = new Intent(MainActivity.this, MySensorService.class);
-                serviceIntent.putExtra("currentActivity", 2);
+                serviceIntent.putExtra("currentActivity", 0);
                 startService(serviceIntent);
                 currentActivity = 0;
             }
